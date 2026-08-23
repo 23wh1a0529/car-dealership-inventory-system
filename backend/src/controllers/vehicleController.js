@@ -3,7 +3,9 @@ const {
   getAllVehicles,
   searchVehicles,
   updateVehicle,
-  deleteVehicle
+  deleteVehicle,
+  purchaseVehicle,
+  restockVehicle
 } = require("../services/vehicleService");
 
 function create(req, res) {
@@ -51,4 +53,22 @@ function remove(req, res) {
   }
 }
 
-module.exports = { create, list, search, update, remove };
+function purchase(req, res) {
+  try {
+    const vehicle = purchaseVehicle(req.params.id);
+    res.status(200).json(vehicle);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
+}
+
+function restock(req, res) {
+  try {
+    const vehicle = restockVehicle(req.params.id, req.body.amount);
+    res.status(200).json(vehicle);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list, search, update, remove, purchase, restock };
