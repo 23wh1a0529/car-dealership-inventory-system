@@ -1,6 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Logo from "../components/Logo";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -29,7 +30,7 @@ function Register() {
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
       <div className="bg-surface rounded-xl shadow-sm border border-ink/10 p-8 w-full max-w-sm">
-        <h1 className="font-display text-2xl font-semibold text-teal mb-1">AutoLedger</h1>
+        <div className="mb-1"><Logo size="sm" /></div>
         <p className="font-body text-ink/60 text-sm mb-6">Create your account</p>
 
         {error && (
@@ -87,3 +88,4 @@ function Register() {
 }
 
 export default Register;
+

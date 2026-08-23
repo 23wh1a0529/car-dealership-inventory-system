@@ -1,6 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Logo from "../components/Logo";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ function Login() {
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
       <div className="bg-surface rounded-xl shadow-sm border border-ink/10 p-8 w-full max-w-sm">
-        <h1 className="font-display text-2xl font-semibold text-teal mb-1">AutoLedger</h1>
+        <div className="mb-1"><Logo size="sm" /></div>
         <p className="font-body text-ink/60 text-sm mb-6">Sign in to your account</p>
 
         {error && (
@@ -73,6 +74,26 @@ function Login() {
           </button>
         </form>
 
+        <div className="mt-5 pt-4 border-t border-ink/10">
+          <p className="font-body text-xs text-ink/40 text-center mb-2">Quick demo access</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setEmail("admin@autoledger.com"); setPassword("admin123"); }}
+              className="flex-1 text-xs font-body text-teal border border-teal/30 rounded-lg py-1.5 transition-colors duration-150 hover:bg-teal/5"
+            >
+              Use Admin Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail("buyer@autoledger.com"); setPassword("user123"); }}
+              className="flex-1 text-xs font-body text-teal border border-teal/30 rounded-lg py-1.5 transition-colors duration-150 hover:bg-teal/5"
+            >
+              Use User Demo
+            </button>
+          </div>
+        </div>
+
         <p className="font-body text-sm text-ink/60 mt-5 text-center">
           Don't have an account?{" "}
           <Link to="/register" className="text-teal font-medium">
@@ -85,4 +106,6 @@ function Login() {
 }
 
 export default Login;
+
+
 
