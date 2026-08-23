@@ -29,7 +29,7 @@ function getAllVehicles() {
 }
 
 function getVehicleById(id) {
-  const vehicle = db.prepare("SELECT * FROM vehicles WHERE id = ?").get(id);
+  const vehicle = db.prepare("SELECT * FROM vehicles WHERE id = ?").get(Number(id));
   if (!vehicle) {
     throw new AppError("Vehicle not found", 404);
   }
@@ -66,4 +66,30 @@ function searchVehicles(filters) {
   return db.prepare(query).all(...params);
 }
 
-module.exports = { createVehicle, getAllVehicles, getVehicleById, searchVehicles, validateVehicleInput };
+function updateVehicle(id, data) {
+  getVehicleById(id); // throws 404 if missing
+  validateVehicleInput(data);
+
+  const { make, model, category, price, quantity } = data;
+  db.prepare(
+    "UPDATE vehicles SET make = ?, model = ?, category = ?, price = ?, quantity = ? WHERE id = ?"
+  ).run(make, model, category, price, quantity, Number(id));
+
+  return getVehicleById(id);
+}
+
+function deleteVehicle(id) {
+  getVehicleById(id); // throws 404 if missing
+  db.prepare("DELETE FROM vehicles WHERE id = ?").run(Number(id));
+  return { message: "Vehicle deleted successfully" };
+}
+
+module.exports = {
+  createVehicle,
+  getAllVehicles,
+  getVehicleById,
+  searchVehicles,
+  updateVehicle,
+  deleteVehicle,
+  validateVehicleInput
+};
