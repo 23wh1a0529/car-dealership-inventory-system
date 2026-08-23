@@ -209,3 +209,127 @@ describe("GET /api/vehicles/search", () => {
     expect(res.statusCode).toBe(401);
   });
 });
+
+describe("PUT /api/vehicles/:id", () => {
+  const createVehicle = async (token) => {
+    const res = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ make: "Mazda", model: "3", category: "Sedan", price: 20000, quantity: 3 });
+    return res.body.id;
+  };
+
+  it("should update a vehicle's details", async () => {
+    const token = await getToken();
+    const id = await createVehicle(token);
+
+    const res = await request(app)
+      .put(`/api/vehicles/${id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ make: "Mazda", model: "3", category: "Sedan", price: 19500, quantity: 3 });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.price).toBe(19500);
+  });
+
+  it("should return 404 when updating a non-existent vehicle", async () => {
+    const token = await getToken();
+
+    const res = await request(app)
+      .put("/api/vehicles/99999")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ make: "Mazda", model: "3", category: "Sedan", price: 19500, quantity: 3 });
+
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("should reject update without a token", async () => {
+    const token = await getToken();
+    const id = await createVehicle(token);
+
+    const res = await request(app)
+      .put(`/api/vehicles/${id}`)
+      .send({ make: "Mazda", model: "3", category: "Sedan", price: 19500, quantity: 3 });
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  it("should reject update with invalid data", async () => {
+    const token = await getToken();
+    const id = await createVehicle(token);
+
+    const res = await request(app)
+      .put(`/api/vehicles/${id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ make: "Mazda", model: "3", category: "Sedan", price: -100, quantity: 3 });
+
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("DELETE /api/vehicles/:id", () => {
+  const registerAdmin = async (email = "admin@example.com") => {
+    await request(app)
+      .post("/api/auth/register")
+      .send({ email, password: "password123" });
+
+    db.prepare("UPDATE users SET role = ? WHERE email = ?").run("admin", email);
+
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({ email, password: "password123" });
+
+    return res.body.token;
+  };
+
+  const createVehicle = async (token) => {
+    const res = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ make: "Nissan", model: "Altima", category: "Sedan", price: 24000, quantity: 2 });
+    return res.body.id;
+  };
+
+  it("should allow an admin to delete a vehicle", async () => {
+    const adminToken = await registerAdmin();
+    const id = await createVehicle(adminToken);
+
+    const res = await request(app)
+      .delete(`/api/vehicles/${id}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.statusCode).toBe(200);
+
+    const getRes = await request(app)
+      .get("/api/vehicles")
+      .set("Authorization", `Bearer ${adminToken}`);
+    expect(getRes.body.length).toBe(0);
+  });
+
+  it("should reject deletion by a non-admin user", async () => {
+    const adminToken = await registerAdmin();
+    const id = await createVehicle(adminToken);
+    const userToken = await getToken("regularuser@example.com");
+
+    const res = await request(app)
+      .delete(`/api/vehicles/${id}`)
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  it("should return 404 when deleting a non-existent vehicle", async () => {
+    const adminToken = await registerAdmin();
+
+    const res = await request(app)
+      .delete("/api/vehicles/99999")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("should reject deletion without a token", async () => {
+    const res = await request(app).delete("/api/vehicles/1");
+    expect(res.statusCode).toBe(401);
+  });
+});
