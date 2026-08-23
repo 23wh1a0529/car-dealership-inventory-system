@@ -1,8 +1,8 @@
-﻿const { DatabaseSync } = require("node:sqlite");
+const { DatabaseSync } = require("node:sqlite");
 const path = require("path");
 
-const dbFile = process.env.NODE_ENV === "test" ? "dealership.test.db" : "dealership.db";
-const db = new DatabaseSync(path.join(__dirname, "../../" + dbFile));
+const isTest = process.env.NODE_ENV === "test";
+const db = new DatabaseSync(isTest ? ":memory:" : path.join(__dirname, "../../dealership.db"));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
