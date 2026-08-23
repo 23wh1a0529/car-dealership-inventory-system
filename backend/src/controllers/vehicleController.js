@@ -1,4 +1,4 @@
-const { createVehicle, getAllVehicles } = require("../services/vehicleService");
+const { createVehicle, getAllVehicles, searchVehicles } = require("../services/vehicleService");
 
 function create(req, res) {
   try {
@@ -18,4 +18,13 @@ function list(req, res) {
   }
 }
 
-module.exports = { create, list };
+function search(req, res) {
+  try {
+    const vehicles = searchVehicles(req.query);
+    res.status(200).json(vehicles);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list, search };

@@ -36,4 +36,34 @@ function getVehicleById(id) {
   return vehicle;
 }
 
-module.exports = { createVehicle, getAllVehicles, getVehicleById, validateVehicleInput };
+function searchVehicles(filters) {
+  const { make, model, category, minPrice, maxPrice } = filters;
+
+  let query = "SELECT * FROM vehicles WHERE 1=1";
+  const params = [];
+
+  if (make) {
+    query += " AND LOWER(make) = LOWER(?)";
+    params.push(make);
+  }
+  if (model) {
+    query += " AND LOWER(model) = LOWER(?)";
+    params.push(model);
+  }
+  if (category) {
+    query += " AND LOWER(category) = LOWER(?)";
+    params.push(category);
+  }
+  if (minPrice !== undefined) {
+    query += " AND price >= ?";
+    params.push(Number(minPrice));
+  }
+  if (maxPrice !== undefined) {
+    query += " AND price <= ?";
+    params.push(Number(maxPrice));
+  }
+
+  return db.prepare(query).all(...params);
+}
+
+module.exports = { createVehicle, getAllVehicles, getVehicleById, searchVehicles, validateVehicleInput };
