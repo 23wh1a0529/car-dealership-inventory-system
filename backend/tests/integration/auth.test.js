@@ -1,5 +1,10 @@
 ﻿const request = require("supertest");
 const app = require("../../src/app");
+const db = require("../../src/db/database");
+
+beforeEach(() => {
+  db.exec("DELETE FROM users");
+});
 
 describe("POST /api/auth/register", () => {
   it("should register a new user and return 201", async () => {
