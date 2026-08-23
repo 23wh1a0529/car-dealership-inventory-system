@@ -1,4 +1,5 @@
 ﻿const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const db = require("../db/database");
 const AppError = require("../utils/AppError");
 
@@ -26,4 +27,20 @@ function registerUser(email, password) {
   return { message: "User registered successfully" };
 }
 
-module.exports = { registerUser };
+function loginUser(email, password) {
+  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    throw new AppError("Invalid email or password", 401);
+  }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "2h" }
+  );
+
+  return { token };
+}
+
+module.exports = { registerUser, loginUser };
